@@ -2,12 +2,15 @@ package com.rudra.eventreminder.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
-val Purple80 = Color(0xFFD0BCFF)
-val PurpleGrey80 = Color(0xFFCCC2DC)
-val Pink80 = Color(0xFFEFB8C8)
+// Gen Z Palette
+val ElectricBlue = Color(0xFF00FFFF) // A vibrant, energetic cyan
+val HotPink = Color(0xFFFF69B4)      // A bold, playful pink
+val CyberGrape = Color(0xFF58328C)   // A deep, futuristic purple
+val LimeGreen = Color(0xFFBFFF00)     // A sharp, acidic green
 
-val Purple40 = Color(0xFF6650a4)
-val PurpleGrey40 = Color(0xFF625b71)
-val Pink40 = Color(0xFF7D5260)
-
+// Neutral Tones
+val OffWhite = Color(0xFFFAFAFA)
+val DarkCharcoal = Color(0xFF1A1A1A)
+val LightGray = Color(0xFFE0E0E0)
+val MidGray = Color(0xFF888888)
 

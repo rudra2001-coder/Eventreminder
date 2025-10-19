@@ -1,56 +1,57 @@
 package com.rudra.eventreminder.ui
 
-
-
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.Card
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.Icon
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.rudra.eventreminder.data.Event
 import com.rudra.eventreminder.viewmodel.EventViewModel
-import java.time.format.DateTimeFormatter
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun DashboardScreen(viewModel: EventViewModel, onAddClick: () -> Unit) {
-    val events by viewModel.events.collectAsState()
-    Scaffold(
-        topBar = { CenterAlignedTopAppBar(title = { Text("Event Reminder") }) },
-        floatingActionButton = {
-            FloatingActionButton(onClick = onAddClick) {
-                Icon(Icons.Default.Add, contentDescription = "Add")
-            }
-        }
-    ) { padding ->
-        LazyColumn(modifier = Modifier.padding(padding)) {
-            items(events) { e ->
-                EventCard(event = e, onClick = { /* open edit if you want */ })
-            }
-        }
-    }
-}
 
 @Composable
-fun EventCard(event: Event, onClick: () -> Unit) {
-    Card(modifier = Modifier
-        .fillMaxWidth()
-        .padding(8.dp)
-        .clickable { onClick() },
-        shape = MaterialTheme.shapes.medium) {
-        Column(modifier = Modifier.padding(16.dp)) {
-            Text(text = event.title, style = MaterialTheme.typography.titleMedium)
-            Spacer(Modifier.height(4.dp))
-            val fmt = DateTimeFormatter.ofPattern("MMM dd, yyyy")
-            Text(text = "Date: ${event.date.format(fmt)}")
-            event.reminderTime?.let {
-                Text(text = "Reminder: ${it.toString()}")
+fun DashboardScreen(viewModel: EventViewModel, onEventClick: (Long) -> Unit, onAddEvent: () -> Unit) {
+    val events by viewModel.events.collectAsState(initial = emptyList())
+
+    Box(modifier = Modifier.fillMaxSize()) {
+        LazyColumn(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(16.dp)
+        ) {
+            items(events) { event ->
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 4.dp)
+                        .clickable { onEventClick(event.id.toLong()) }
+                ) {
+                    Column(modifier = Modifier.padding(16.dp)) {
+                        Text(text = event.title)
+                    }
+                }
             }
+        }
+        FloatingActionButton(
+            onClick = { onAddEvent() },
+            modifier = Modifier
+                .align(Alignment.BottomEnd)
+                .padding(16.dp)
+        ) {
+            Icon(imageVector = Icons.Default.Add, contentDescription = "Add Event")
         }
     }
 }

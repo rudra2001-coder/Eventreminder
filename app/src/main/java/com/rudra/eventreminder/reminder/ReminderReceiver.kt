@@ -1,7 +1,5 @@
 package com.rudra.eventreminder.reminder
 
-
-
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
@@ -20,7 +18,7 @@ class ReminderReceiver : BroadcastReceiver() {
         val isRecurring = intent.getBooleanExtra("isRecurring", true)
 
         val notif = NotificationCompat.Builder(context, "event_reminders")
-            .setSmallIcon(R.drawable.ic_event) // make sure this exists
+            .setSmallIcon(R.drawable.ic_launcher_foreground) // make sure this exists
             .setContentTitle("Upcoming: $title")
             .setContentText(buildContent(dateStr, timeStr))
             .setPriority(NotificationCompat.PRIORITY_HIGH)
@@ -38,6 +36,8 @@ class ReminderReceiver : BroadcastReceiver() {
                 val tempEvent = com.rudra.eventreminder.data.Event(
                     id = id,
                     title = title,
+                    description = "", // Not needed for rescheduling
+                    emoji = "", // Not needed for rescheduling
                     date = date,
                     reminderTime = time,
                     isRecurring = true

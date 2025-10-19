@@ -1,21 +1,27 @@
 package com.rudra.eventreminder.data
 
-
-
 import androidx.room.TypeConverter
 import java.time.LocalDate
 import java.time.LocalTime
 
 class Converters {
     @TypeConverter
-    fun fromLocalDate(date: LocalDate?): String? = date?.toString()
+    fun fromLocalDate(date: LocalDate?): String? {
+        return date?.toString()
+    }
 
     @TypeConverter
-    fun toLocalDate(value: String?): LocalDate? = value?.let { LocalDate.parse(it) }
+    fun toLocalDate(dateString: String?): LocalDate? {
+        return dateString?.let { LocalDate.parse(it) }
+    }
 
     @TypeConverter
-    fun fromLocalTime(time: LocalTime?): String? = time?.toString()
+    fun fromLocalTime(time: LocalTime?): String? {
+        return time?.toString()
+    }
 
     @TypeConverter
-    fun toLocalTime(value: String?): LocalTime? = value?.let { LocalTime.parse(it) }
+    fun toLocalTime(timeString: String?): LocalTime? {
+        return timeString?.let { LocalTime.parse(it) }
+    }
 }
