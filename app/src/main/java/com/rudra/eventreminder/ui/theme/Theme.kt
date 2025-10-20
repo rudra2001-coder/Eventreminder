@@ -16,36 +16,36 @@ import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
 
 private val DarkColorScheme = darkColorScheme(
-    primary = CyberGrape,
-    secondary = HotPink,
-    tertiary = LimeGreen,
-    background = DarkCharcoal,
-    surface = DarkCharcoal,
-    onPrimary = OffWhite,
-    onSecondary = OffWhite,
-    onTertiary = DarkCharcoal,
-    onBackground = OffWhite,
-    onSurface = OffWhite,
+    primary = LightBlue,
+    secondary = LightEmeraldGreen,
+    background = DarkBlueGray,
+    surface = DarkSlateGray,
+    error = SoftRed,
+    onPrimary = White,
+    onSecondary = White,
+    onBackground = LightGray,
+    onSurface = LightGray,
+    onError = White
 )
 
 private val LightColorScheme = lightColorScheme(
-    primary = ElectricBlue,
-    secondary = HotPink,
-    tertiary = LimeGreen,
-    background = OffWhite,
-    surface = OffWhite,
-    onPrimary = DarkCharcoal,
-    onSecondary = DarkCharcoal,
-    onTertiary = DarkCharcoal,
-    onBackground = DarkCharcoal,
-    onSurface = DarkCharcoal,
+    primary = BrightBlue,
+    secondary = EmeraldGreen,
+    background = OffWhiteGray,
+    surface = White,
+    error = SoftRed,
+    onPrimary = White,
+    onSecondary = White,
+    onBackground = VeryDarkGray,
+    onSurface = VeryDarkGray,
+    onError = White
 )
 
 @Composable
 fun EventReminderTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
     // Dynamic color is available on Android 12+
-    dynamicColor: Boolean = false, // Changed to false to use custom theme
+    dynamicColor: Boolean = true, // Enabled dynamic color
     content: @Composable () -> Unit
 ) {
     val colorScheme = when {
@@ -53,7 +53,6 @@ fun EventReminderTheme(
             val context = LocalContext.current
             if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
         }
-
         darkTheme -> DarkColorScheme
         else -> LightColorScheme
     }
