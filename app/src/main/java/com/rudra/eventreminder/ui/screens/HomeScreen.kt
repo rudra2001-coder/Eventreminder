@@ -10,6 +10,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Face
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material3.Card
@@ -37,6 +38,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.rudra.eventreminder.data.Event
 import com.rudra.eventreminder.util.DateUtils
 import com.rudra.eventreminder.viewmodel.EventViewModel
 import kotlinx.coroutines.launch
@@ -44,8 +46,8 @@ import kotlinx.coroutines.launch
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
-    viewModel: EventViewModel, 
-    onNavigateToAddMemory: () -> Unit, 
+    viewModel: EventViewModel,
+    onNavigateToAddMemory: () -> Unit,
     onNavigateToEmojiExplorer: () -> Unit,
     onNavigateToUpcomingEvents: () -> Unit,
     onNavigateToPastEvents: () -> Unit
@@ -66,7 +68,7 @@ fun HomeScreen(
         Scaffold(
             topBar = {
                 TopAppBar(
-                    title = { Text(text = "Memora", style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.Bold)) },
+                    title = { Text(text = "All Memorys Day'", style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.Bold)) },
                     navigationIcon = {
                         IconButton(onClick = { scope.launch { drawerState.open() } }) {
                             Icon(Icons.Default.Menu, contentDescription = "Menu")
@@ -111,7 +113,11 @@ fun HomeScreen(
                 items(upcomingEvents) { event ->
                     val daysLeft = DateUtils.daysLeft(event.date, event.isRecurring)
                     if (daysLeft >= 0) {
-                        EventCountdownCard(title = event.title, daysLeft = daysLeft, emoji = event.emoji)
+                        EventCountdownCard(
+                            event = event,
+                            daysLeft = daysLeft,
+                            onDelete = { viewModel.deleteEvent(event.id.toLong()) }
+                        )
                     }
                 }
             }
@@ -120,7 +126,7 @@ fun HomeScreen(
 }
 
 @Composable
-fun EventCountdownCard(title: String, daysLeft: Long, emoji: String) {
+fun EventCountdownCard(event: Event, daysLeft: Long, onDelete: () -> Unit) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -135,9 +141,9 @@ fun EventCountdownCard(title: String, daysLeft: Long, emoji: String) {
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            Column {
+            Column(modifier = Modifier.weight(1f)) {
                 Text(
-                    text = title,
+                    text = event.title,
                     style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold)
                 )
                 Text(
@@ -145,7 +151,10 @@ fun EventCountdownCard(title: String, daysLeft: Long, emoji: String) {
                     style = MaterialTheme.typography.bodyMedium.copy(color = MaterialTheme.colorScheme.primary)
                 )
             }
-            Text(text = emoji, fontSize = 32.sp)
+            Text(text = event.emoji, fontSize = 32.sp)
+            IconButton(onClick = onDelete) {
+                Icon(Icons.Default.Delete, contentDescription = "Delete Event")
+            }
         }
     }
 }

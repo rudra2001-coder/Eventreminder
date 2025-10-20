@@ -19,6 +19,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.rudra.eventreminder.data.Event
 import com.rudra.eventreminder.util.DateUtils
 import com.rudra.eventreminder.viewmodel.EventViewModel
 
@@ -50,7 +51,11 @@ fun UpcomingEventsScreen(viewModel: EventViewModel, onNavigateBack: () -> Unit) 
                 .padding(horizontal = 8.dp)
         ) {
             items(upcomingEvents.filter { DateUtils.daysLeft(it.date, it.isRecurring) >= 0 }) { event ->
-                EventCountdownCard(title = event.title, daysLeft = DateUtils.daysLeft(event.date, event.isRecurring), emoji = event.emoji)
+                EventCountdownCard(
+                    event = event,
+                    daysLeft = DateUtils.daysLeft(event.date, event.isRecurring),
+                    onDelete = { viewModel.deleteEvent(event.id.toLong()) }
+                )
             }
         }
     }

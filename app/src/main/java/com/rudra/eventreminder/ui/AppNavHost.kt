@@ -34,6 +34,11 @@ fun AppNavHost(navController: NavHostController = rememberNavController()) {
             eventId?.let { id ->
                 EventDetailScreen(viewModel = viewModel, eventId = id, onEdit = { eventIdToEdit ->
                     navController.navigate("add_edit_event/$eventIdToEdit")
+                }, onDelete = {
+                    viewModel.deleteEvent(id)
+                    navController.popBackStack()
+                }, onBack = {
+                    navController.popBackStack()
                 })
             }
         }
