@@ -2,6 +2,8 @@ package com.rudra.eventreminder.ui
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -21,15 +23,22 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.CalendarToday
 import androidx.compose.material.icons.filled.Event
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.Timeline
+import androidx.compose.material.ripple.rememberRipple
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
@@ -42,33 +51,53 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.rudra.eventreminder.data.Event
+import com.rudra.eventreminder.ui.theme.Theme
+import com.rudra.eventreminder.viewmodel.BackupViewModel
 import com.rudra.eventreminder.viewmodel.EventViewModel
+import com.rudra.eventreminder.viewmodel.ThemeViewModel
 import java.time.LocalDate
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoUnit
 
+enum class SortOption {
+    DATE,
+    TITLE,
+    EVENT_TYPE
+}
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DashboardScreen(
     viewModel: EventViewModel,
-    onEventClick: (Long) -> Unit,
-    onAddEvent: () -> Unit
+    themeViewModel: ThemeViewModel,
+    backupViewModel: BackupViewModel,
+    onEventClick: (Event) -> Unit,
+    onAddEvent: () -> Unit,
+    onNavigateToTimeline: () -> Unit
 ) {
     val events by viewModel.events.collectAsState(initial = emptyList())
     var searchQuery by remember { mutableStateOf("") }
+    var sortOption by remember { mutableStateOf(SortOption.DATE) }
 
     val filteredEvents = events.filter { event ->
         event.title.contains(searchQuery, ignoreCase = true) ||
-                event.description.contains(searchQuery, ignoreCase = true)
+                !event.description.isNullOrBlank() && event.description.contains(searchQuery, ignoreCase = true)
     }
 
-    val upcomingEvents = filteredEvents.sortedBy { it.date }
+    val sortedEvents = when (sortOption) {
+        SortOption.DATE -> filteredEvents.sortedBy { it.date }
+        SortOption.TITLE -> filteredEvents.sortedBy { it.title }
+        SortOption.EVENT_TYPE -> filteredEvents.sortedBy { it.eventType }
+    }
+
+    val upcomingEvents = sortedEvents
     val todayEvents = upcomingEvents.filter {
         it.date == LocalDate.now()
     }
@@ -88,13 +117,33 @@ fun DashboardScreen(
                     titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer
                 ),
                 actions = {
-                    // Search Icon
-                    Icon(
-                        imageVector = Icons.Default.Search,
-                        contentDescription = "Search",
-                        modifier = Modifier
-                            .padding(horizontal = 12.dp)
-                            .clickable { /* Implement search functionality */ }
+                    var showSearch by remember { mutableStateOf(false) }
+                    if (showSearch) {
+                        TextField(
+                            value = searchQuery,
+                            onValueChange = { searchQuery = it },
+                            label = { Text("Search") },
+                            modifier = Modifier.fillMaxWidth(0.8f)
+                        )
+                    } else {
+                        IconButton(onClick = { showSearch = true }) {
+                            Icon(
+                                imageVector = Icons.Default.Search,
+                                contentDescription = "Search"
+                            )
+                        }
+                    }
+                    IconButton(onClick = { onNavigateToTimeline() }) {
+                        Icon(
+                            imageVector = Icons.Default.Timeline,
+                            contentDescription = "Timeline"
+                        )
+                    }
+                    MoreOptions(
+                        themeViewModel = themeViewModel, 
+                        backupViewModel = backupViewModel, 
+                        events = events,
+                        onSortOptionSelected = { sortOption = it }
                     )
                 }
             )
@@ -143,7 +192,7 @@ fun DashboardScreen(
                     items(todayEvents) { event ->
                         EventCard(
                             event = event,
-                            onEventClick = { onEventClick(event.id.toLong()) },
+                            onEventClick = { onEventClick(event) },
                             isToday = true
                         )
                     }
@@ -168,7 +217,7 @@ fun DashboardScreen(
                 items(upcomingEvents) { event ->
                     EventCard(
                         event = event,
-                        onEventClick = { onEventClick(event.id.toLong()) },
+                        onEventClick = { onEventClick(event) },
                         isToday = false
                     )
                 }
@@ -250,11 +299,21 @@ fun StatItem(count: String, label: String, icon: androidx.compose.ui.graphics.ve
 
 @Composable
 fun EventCard(event: Event, onEventClick: () -> Unit, isToday: Boolean) {
+    val interactionSource = remember { MutableInteractionSource() }
+    val isPressed by interactionSource.collectIsPressedAsState()
+    val scale = if (isPressed) 0.96f else 1f
+    val elevation = if (isPressed) 8.dp else 4.dp
+
     Card(
         modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 4.dp)
-            .clickable { onEventClick() },
+            .graphicsLayer { this.scaleX = scale; this.scaleY = scale }
+            .clickable(
+                interactionSource = interactionSource,
+                indication = rememberRipple(),
+                onClick = onEventClick
+            ),
         colors = CardDefaults.cardColors(
             containerColor = if (isToday) {
                 MaterialTheme.colorScheme.primaryContainer
@@ -262,7 +321,7 @@ fun EventCard(event: Event, onEventClick: () -> Unit, isToday: Boolean) {
                 MaterialTheme.colorScheme.surface
             }
         ),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = elevation),
         shape = RoundedCornerShape(12.dp)
     ) {
         Row(
@@ -293,7 +352,7 @@ fun EventCard(event: Event, onEventClick: () -> Unit, isToday: Boolean) {
                     color = MaterialTheme.colorScheme.onSurface
                 )
 
-                if (event.description.isNotBlank()) {
+                if (!event.description.isNullOrBlank()) {
                     Text(
                         text = event.description,
                         style = MaterialTheme.typography.bodySmall,
@@ -305,7 +364,7 @@ fun EventCard(event: Event, onEventClick: () -> Unit, isToday: Boolean) {
                 }
 
                 Text(
-                    text = formatEventDateTime(event.date, event.reminderTime),
+                    text = formatEventDateTime(event.date, event.reminderTimes.firstOrNull()),
                     style = MaterialTheme.typography.labelSmall,
                     color = MaterialTheme.colorScheme.outline,
                     modifier = Modifier.padding(top = 4.dp)
@@ -327,7 +386,6 @@ fun EventCard(event: Event, onEventClick: () -> Unit, isToday: Boolean) {
                         Text(
                             text = "${daysRemaining}d",
                             style = MaterialTheme.typography.labelSmall,
-                            fontWeight = FontWeight.Bold,
                             color = MaterialTheme.colorScheme.onSecondaryContainer
                         )
                     }
@@ -341,38 +399,80 @@ fun EventCard(event: Event, onEventClick: () -> Unit, isToday: Boolean) {
 fun EmptyState() {
     Column(
         modifier = Modifier
-            .fillMaxWidth()
-            .padding(32.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
+            .fillMaxSize()
+            .padding(16.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
     ) {
         Icon(
             imageVector = Icons.Default.Event,
-            contentDescription = "No events",
-            modifier = Modifier.size(64.dp),
-            tint = MaterialTheme.colorScheme.outline
+            contentDescription = "No Events",
+            tint = MaterialTheme.colorScheme.primary,
+            modifier = Modifier.size(64.dp)
         )
         Spacer(modifier = Modifier.height(16.dp))
         Text(
-            text = "No Events Found",
-            style = MaterialTheme.typography.titleMedium,
-            color = MaterialTheme.colorScheme.onBackground
+            text = "No events yet",
+            style = MaterialTheme.typography.headlineSmall,
+            fontWeight = FontWeight.Bold
         )
         Text(
-            text = "Tap the + button to create your first event",
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.outline,
-            modifier = Modifier.padding(top = 8.dp)
+            text = "Add a new event to get started",
+            style = MaterialTheme.typography.bodyLarge,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
         )
     }
 }
 
-// Helper functions (you might need to adjust these based on your Event model)
-private fun formatEventDateTime(date: LocalDate, time: LocalTime?): String {
-    val datePart = date.format(DateTimeFormatter.ofPattern("MMM dd, yyyy"))
-    val timePart = time?.format(DateTimeFormatter.ofPattern("hh:mm a")) ?: ""
-    return "$datePart at $timePart"
+private fun calculateDaysRemaining(date: LocalDate): Long {
+    return ChronoUnit.DAYS.between(LocalDate.now(), date)
 }
 
-private fun calculateDaysRemaining(eventDate: LocalDate): Long {
-    return ChronoUnit.DAYS.between(LocalDate.now(), eventDate)
+private fun formatEventDateTime(date: LocalDate, time: LocalTime?): String {
+    val datePattern = "MMM dd, yyyy"
+    val timePattern = "HH:mm a"
+    val dateStr = date.format(DateTimeFormatter.ofPattern(datePattern))
+    val timeStr = time?.format(DateTimeFormatter.ofPattern(timePattern)) ?: ""
+    return "$dateStr $timeStr".trim()
+}
+
+@Composable
+fun MoreOptions(
+    themeViewModel: ThemeViewModel,
+    backupViewModel: BackupViewModel,
+    events: List<Event>,
+    onSortOptionSelected: (SortOption) -> Unit
+) {
+    var expanded by remember { mutableStateOf(false) }
+
+    Box {
+        IconButton(onClick = { expanded = true }) {
+            Icon(Icons.Default.MoreVert, contentDescription = "More options")
+        }
+        DropdownMenu(
+            expanded = expanded,
+            onDismissRequest = { expanded = false }
+        ) {
+            Theme.values().forEach { theme ->
+                DropdownMenuItem(onClick = {
+                    themeViewModel.setTheme(theme)
+                    expanded = false
+                }, text = { Text(text = theme.name) })
+            }
+            DropdownMenuItem(onClick = {
+                backupViewModel.exportEvents(events)
+                expanded = false
+            }, text = { Text(text = "Export") })
+            DropdownMenuItem(onClick = {
+                backupViewModel.importEvents()
+                expanded = false
+            }, text = { Text(text = "Import") })
+            SortOption.values().forEach { sortOption ->
+                DropdownMenuItem(onClick = {
+                    onSortOptionSelected(sortOption)
+                    expanded = false
+                }, text = { Text(text = "Sort by ${sortOption.name}") })
+            }
+        }
+    }
 }

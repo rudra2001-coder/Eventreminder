@@ -18,7 +18,7 @@ interface EventDao {
     fun getEventById(id: Long): Flow<Event>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun addEvent(event: Event)
+    suspend fun addEvent(event: Event): Long
 
     @Update
     suspend fun updateEvent(event: Event)

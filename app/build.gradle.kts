@@ -67,6 +67,8 @@ dependencies {
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.6.1")
     implementation("androidx.compose.material:material-icons-extended:1.5.0")
     implementation("com.google.code.gson:gson:2.10.1")
+    implementation("com.valentinilk.shimmer:compose-shimmer:1.2.0")
+    implementation("com.airbnb.android:lottie-compose:6.1.0")
 
 
 

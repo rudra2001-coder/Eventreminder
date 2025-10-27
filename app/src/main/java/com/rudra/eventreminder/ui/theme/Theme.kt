@@ -14,6 +14,15 @@ import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
+import java.time.LocalDate
+
+enum class Theme {
+    DEFAULT,
+    GRADIENT,
+    GLASSMORPHIC,
+    AMOLED,
+    FESTIVAL
+}
 
 private val DarkColorScheme = darkColorScheme(
     primary = LightBlue,
@@ -43,6 +52,33 @@ private val LightColorScheme = lightColorScheme(
 
 @Composable
 fun EventReminderTheme(
+    theme: Theme = Theme.DEFAULT,
+    darkTheme: Boolean = isSystemInDarkTheme(),
+    // Dynamic color is available on Android 12+
+    dynamicColor: Boolean = true, // Enabled dynamic color
+    content: @Composable () -> Unit
+) {
+    when (theme) {
+        Theme.DEFAULT -> {
+            DefaultTheme(darkTheme = darkTheme, dynamicColor = dynamicColor, content = content)
+        }
+        Theme.GRADIENT -> {
+            GradientTheme(darkTheme = darkTheme, content = content)
+        }
+        Theme.GLASSMORPHIC -> {
+            GlassmorphicTheme(darkTheme = darkTheme, content = content)
+        }
+        Theme.AMOLED -> {
+            AmoledTheme(darkTheme = darkTheme, content = content)
+        }
+        Theme.FESTIVAL -> {
+            FestivalTheme(darkTheme = darkTheme, content = content)
+        }
+    }
+}
+
+@Composable
+fun DefaultTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
     // Dynamic color is available on Android 12+
     dynamicColor: Boolean = true, // Enabled dynamic color
@@ -53,9 +89,106 @@ fun EventReminderTheme(
             val context = LocalContext.current
             if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
         }
+
         darkTheme -> DarkColorScheme
         else -> LightColorScheme
     }
+    val view = LocalView.current
+    if (!view.isInEditMode) {
+        SideEffect {
+            val window = (view.context as Activity).window
+            window.statusBarColor = colorScheme.primary.toArgb()
+            WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = !darkTheme
+        }
+    }
+
+    MaterialTheme(
+        colorScheme = colorScheme,
+        typography = Typography,
+        content = content
+    )
+}
+
+@Composable
+fun GradientTheme(
+    darkTheme: Boolean = isSystemInDarkTheme(),
+    content: @Composable () -> Unit
+) {
+    val colorScheme = if (darkTheme) GradientDarkColorScheme else GradientLightColorScheme
+
+    val view = LocalView.current
+    if (!view.isInEditMode) {
+        SideEffect {
+            val window = (view.context as Activity).window
+            window.statusBarColor = colorScheme.primary.toArgb()
+            WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = !darkTheme
+        }
+    }
+
+    MaterialTheme(
+        colorScheme = colorScheme,
+        typography = Typography,
+        content = content
+    )
+}
+
+@Composable
+fun GlassmorphicTheme(
+    darkTheme: Boolean = isSystemInDarkTheme(),
+    content: @Composable () -> Unit
+) {
+    val colorScheme = if (darkTheme) GlassmorphicDarkColorScheme else GlassmorphicLightColorScheme
+
+    val view = LocalView.current
+    if (!view.isInEditMode) {
+        SideEffect {
+            val window = (view.context as Activity).window
+            window.statusBarColor = colorScheme.primary.toArgb()
+            WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = !darkTheme
+        }
+    }
+
+    MaterialTheme(
+        colorScheme = colorScheme,
+        typography = Typography,
+        content = content
+    )
+}
+
+@Composable
+fun AmoledTheme(
+    darkTheme: Boolean = isSystemInDarkTheme(),
+    content: @Composable () -> Unit
+) {
+    val colorScheme = if (darkTheme) AmoledDarkColorScheme else LightColorScheme
+
+    val view = LocalView.current
+    if (!view.isInEditMode) {
+        SideEffect {
+            val window = (view.context as Activity).window
+            window.statusBarColor = colorScheme.primary.toArgb()
+            WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = !darkTheme
+        }
+    }
+
+    MaterialTheme(
+        colorScheme = colorScheme,
+        typography = Typography,
+        content = content
+    )
+}
+
+@Composable
+fun FestivalTheme(
+    darkTheme: Boolean = isSystemInDarkTheme(),
+    content: @Composable () -> Unit
+) {
+    val festival = getFestivalForDate(LocalDate.now())
+    val colorScheme = when (festival) {
+        Festival.CHRISTMAS -> ChristmasColorScheme
+        else -> if (darkTheme) DarkColorScheme else LightColorScheme
+    }
+
     val view = LocalView.current
     if (!view.isInEditMode) {
         SideEffect {

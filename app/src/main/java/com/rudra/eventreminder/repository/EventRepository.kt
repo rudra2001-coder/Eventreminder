@@ -11,8 +11,8 @@ class EventRepository(private val eventDao: EventDao) {
         return eventDao.getEventById(id)
     }
 
-    suspend fun addEvent(event: Event) {
-        eventDao.addEvent(event)
+    suspend fun addEvent(event: Event): Long {
+        return eventDao.addEvent(event)
     }
 
     suspend fun updateEvent(event: Event) {

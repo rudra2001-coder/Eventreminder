@@ -5,9 +5,11 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.rudra.eventreminder.data.AppDatabase
 import com.rudra.eventreminder.data.Event
+import com.rudra.eventreminder.reminder.ReminderScheduler
 import com.rudra.eventreminder.repository.EventRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
 class EventViewModel(application: Application) : AndroidViewModel(application) {
@@ -25,18 +27,24 @@ class EventViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     fun addEvent(event: Event) = viewModelScope.launch(Dispatchers.IO) {
-        repository.addEvent(event)
+        val newEventId = repository.addEvent(event)
+        val newEvent = repository.getEventById(newEventId).first()
+        if (newEvent != null) {
+            ReminderScheduler.scheduleReminders(getApplication(), newEvent)
+        }
     }
 
     fun updateEvent(event: Event) = viewModelScope.launch(Dispatchers.IO) {
         repository.updateEvent(event)
+        ReminderScheduler.cancelReminders(getApplication(), event)
+        ReminderScheduler.scheduleReminders(getApplication(), event)
     }
 
     fun deleteEvent(eventId: Long) = viewModelScope.launch(Dispatchers.IO) {
-        repository.getEventById(eventId).collect {
-            if (it != null) {
-                repository.deleteEvent(it)
-            }
+        val event = repository.getEventById(eventId).first()
+        if (event != null) {
+            repository.deleteEvent(event)
+            ReminderScheduler.cancelReminders(getApplication(), event)
         }
     }
 }

@@ -2,6 +2,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
+    <uses-permission android:name="android.permission.USE_FULL_SCREEN_INTENT" />
 
     <application
         android:allowBackup="true"
@@ -13,6 +14,8 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Eventreminder">
         <receiver android:name=".reminder.ReminderReceiver"
+            />
+        <receiver android:name=".reminder.SnoozeReceiver"
             />
 
         <receiver android:name=".receivers.BootReceiver"
@@ -32,6 +35,9 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity
+            android:name=".FullScreenNotificationActivity"
+            android:exported="false" />
     </application>
 
 </manifest>
