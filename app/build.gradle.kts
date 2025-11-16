@@ -71,10 +71,17 @@ dependencies {
     implementation("com.airbnb.android:lottie-compose:6.1.0")
 
 
+    implementation("androidx.compose.material3:material3:1.2.0")
+// or latest stable
+    implementation("androidx.compose.ui:ui:1.6.0")
+// Compose UI version
+    implementation("androidx.compose.foundation:foundation:1.6.0")
 
 
-
-
+    implementation("com.google.accompanist:accompanist-navigation-animation:0.31.6-rc")
+    implementation("androidx.navigation:navigation-compose:2.7.5")
+// Material Design 3
+    implementation("androidx.compose.material3:material3:1.1.2")
 
 
     // DateTime Handling (recommended for event apps)

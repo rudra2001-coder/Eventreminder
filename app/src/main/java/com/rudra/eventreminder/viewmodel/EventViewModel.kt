@@ -29,9 +29,7 @@ class EventViewModel(application: Application) : AndroidViewModel(application) {
     fun addEvent(event: Event) = viewModelScope.launch(Dispatchers.IO) {
         val newEventId = repository.addEvent(event)
         val newEvent = repository.getEventById(newEventId).first()
-        if (newEvent != null) {
-            ReminderScheduler.scheduleReminders(getApplication(), newEvent)
-        }
+        ReminderScheduler.scheduleReminders(getApplication(), newEvent)
     }
 
     fun updateEvent(event: Event) = viewModelScope.launch(Dispatchers.IO) {
@@ -42,9 +40,7 @@ class EventViewModel(application: Application) : AndroidViewModel(application) {
 
     fun deleteEvent(eventId: Long) = viewModelScope.launch(Dispatchers.IO) {
         val event = repository.getEventById(eventId).first()
-        if (event != null) {
-            repository.deleteEvent(event)
-            ReminderScheduler.cancelReminders(getApplication(), event)
-        }
+        repository.deleteEvent(event)
+        ReminderScheduler.cancelReminders(getApplication(), event)
     }
 }

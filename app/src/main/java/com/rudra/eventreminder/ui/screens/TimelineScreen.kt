@@ -1,12 +1,11 @@
 package com.rudra.eventreminder.ui.screens
 
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -20,6 +19,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
+import com.rudra.eventreminder.ui.composables.EventCountdownCard
 import com.rudra.eventreminder.viewmodel.EventViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -33,7 +33,7 @@ fun TimelineScreen(viewModel: EventViewModel, onNavigateBack: () -> Unit) {
                 title = { Text(text = "Timeline", style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.Bold)) },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Back")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
@@ -52,7 +52,7 @@ fun TimelineScreen(viewModel: EventViewModel, onNavigateBack: () -> Unit) {
             items(events.sortedBy { it.date }) { event ->
                 // For now, lets just reuse the EventCountdownCard
                 val daysLeft = com.rudra.eventreminder.util.DateUtils.daysLeft(event.date, event.isRecurring)
-                EventCountdownCard(event = event, daysLeft = daysLeft, onDelete = { viewModel.deleteEvent(event.id.toLong()) })
+                EventCountdownCard(event = event, daysLeft = daysLeft, onDelete = { viewModel.deleteEvent(event.id.toLong()) }, onEventClick = {})
             }
         }
     }

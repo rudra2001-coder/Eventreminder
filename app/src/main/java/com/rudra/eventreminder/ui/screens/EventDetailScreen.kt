@@ -1,4 +1,4 @@
-package com.rudra.eventreminder.ui
+package com.rudra.eventreminder.ui.screens
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -18,13 +18,13 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Description
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Title
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -47,14 +47,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.rudra.eventreminder.data.Event
 import com.rudra.eventreminder.viewmodel.EventViewModel
 import java.time.LocalDate
-import java.time.LocalTime
 import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoUnit
 
@@ -207,7 +206,7 @@ fun EventDetailScreen(
                                 DetailItem(
                                     icon = Icons.Default.Notifications,
                                     title = "Time",
-                                    content = eventDetails.reminderTime?.format(DateTimeFormatter.ofPattern("hh:mm a")) ?: "",
+                                    content = eventDetails.reminderTimes.firstOrNull()?.format(DateTimeFormatter.ofPattern("hh:mm a")) ?: "Not set",
                                     iconColor = MaterialTheme.colorScheme.tertiary,
                                     compact = true
                                 )
@@ -317,7 +316,7 @@ private fun EventStatusHeader(eventDetails: Event) {
 
 @Composable
 private fun DetailItem(
-    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    icon: ImageVector,
     title: String,
     content: String,
     iconColor: Color,
@@ -395,7 +394,7 @@ private fun DeleteConfirmationDialog(
     onConfirm: () -> Unit,
     onDismiss: () -> Unit
 ) {
-    androidx.compose.material3.AlertDialog(
+    AlertDialog(
         onDismissRequest = onDismiss,
         title = { Text("Delete Event") },
         text = { Text("Are you sure you want to delete this event? This action cannot be undone.") },

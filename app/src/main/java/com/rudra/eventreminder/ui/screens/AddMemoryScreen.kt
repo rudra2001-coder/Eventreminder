@@ -14,8 +14,8 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
@@ -50,65 +50,14 @@ import java.util.Calendar
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AddMemoryScreen(viewModel: EventViewModel, onDone: () -> Unit) {
-    val ctx = LocalContext.current
-    var title by remember { mutableStateOf("") }
-    var desc by remember { mutableStateOf("") }
-    var eventType by remember { mutableStateOf("General") }
-    var emoji by remember { mutableStateOf("") }
-    var date by remember { mutableStateOf(LocalDate.now()) }
-    var reminderTimes by remember { mutableStateOf(listOf<LocalTime>()) }
-    var recur by remember { mutableStateOf(true) }
-    var showReminderDialog by remember { mutableStateOf(false) }
-
-    val calendar = Calendar.getInstance()
-    val datePicker = DatePickerDialog(
-        ctx,
-        { _: DatePicker, y, m, d ->
-            val selectedDate = LocalDate.of(y, m + 1, d)
-            date = selectedDate
-            if (DateUtils.daysLeft(selectedDate, false) in 0..7) {
-                showReminderDialog = true
-            }
-        },
-        calendar.get(Calendar.YEAR),
-        calendar.get(Calendar.MONTH),
-        calendar.get(Calendar.DAY_OF_MONTH)
-    )
-
-    val timePicker = TimePickerDialog(
-        ctx,
-        { _, hour, min ->
-            reminderTimes = reminderTimes + LocalTime.of(hour, min)
-        },
-        9, 0, true
-    )
-
-    if (showReminderDialog) {
-        AlertDialog(
-            onDismissRequest = { showReminderDialog = false },
-            title = { Text("Set Reminder") },
-            text = { Text("This event is within 7 days. Do you want to set a reminder for it?") },
-            confirmButton = {
-                TextButton(onClick = { showReminderDialog = false }) {
-                    Text("Yes")
-                }
-            },
-            dismissButton = {
-                TextButton(onClick = { reminderTimes = emptyList(); showReminderDialog = false }) {
-                    Text("No")
-                }
-            }
-        )
-    }
-
+fun AddMemoryScreen(onBack: () -> Unit, viewModel: EventViewModel) {
     Scaffold(
         topBar = {
             TopAppBar(
                 title = { Text(text = "Add Memory", style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.Bold)) },
                 navigationIcon = {
-                    IconButton(onClick = onDone) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Back")
+                    IconButton(onClick = onBack) {
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
@@ -125,86 +74,6 @@ fun AddMemoryScreen(viewModel: EventViewModel, onDone: () -> Unit) {
                 .padding(paddingValues)
                 .padding(16.dp)
         ) {
-
-            OutlinedTextField(
-                value = title,
-                onValueChange = {
-                    title = it
-                    eventType = when {
-                        it.contains("birthday", ignoreCase = true) -> "Birthday"
-                        it.contains("anniversary", ignoreCase = true) -> "Anniversary"
-                        it.contains("bill", ignoreCase = true) -> "Bill"
-                        it.contains("pay", ignoreCase = true) -> "Payment"
-                        else -> "General"
-                    }
-                },
-                label = { Text("Title") },
-                modifier = Modifier.fillMaxWidth()
-            )
-            Spacer(Modifier.height(8.dp))
-            OutlinedTextField(value = desc, onValueChange = { desc = it }, label = { Text("Description") }, modifier = Modifier.fillMaxWidth())
-            Spacer(Modifier.height(8.dp))
-             OutlinedTextField(
-                value = eventType,
-                onValueChange = { },
-                label = { Text("Event Type") },
-                modifier = Modifier.fillMaxWidth(),
-                enabled = false
-            )
-            Spacer(Modifier.height(8.dp))
-            OutlinedTextField(value = emoji, onValueChange = { emoji = it }, label = { Text("Emoji") }, modifier = Modifier.fillMaxWidth())
-            Spacer(Modifier.height(8.dp))
-
-            Row {
-                Button(onClick = { datePicker.show() }) { Text("Pick date: ${date.toString()}") }
-            }
-            Spacer(Modifier.height(8.dp))
-
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Checkbox(checked = recur, onCheckedChange = { recur = it })
-                Text("Recurring yearly")
-            }
-            Spacer(Modifier.height(16.dp))
-
-            Text("Reminders", style = MaterialTheme.typography.titleMedium)
-            LazyColumn {
-                items(reminderTimes) { time ->
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Text(time.toString())
-                        IconButton(onClick = { reminderTimes = reminderTimes - time }) {
-                            Icon(Icons.Default.Delete, contentDescription = "Delete reminder")
-                        }
-                    }
-                }
-            }
-            Button(onClick = { timePicker.show() }) {
-                Icon(Icons.Default.Add, contentDescription = "Add reminder")
-                Spacer(Modifier.width(8.dp))
-                Text("Add reminder")
-            }
-
-            Spacer(Modifier.height(16.dp))
-
-            Button(
-                onClick = {
-                    if (title.isBlank() || emoji.isBlank()) return@Button
-                    val event = Event(
-                        title = title,
-                        description = desc,
-                        date = date,
-                        eventType = eventType,
-                        emoji = emoji,
-                        reminderTimes = reminderTimes,
-                        isRecurring = recur
-                    )
-                    viewModel.addEvent(event)
-                    onDone()
-                },
-                modifier = Modifier.fillMaxWidth(),
-                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.secondary)
-            ) {
-                Text("Save", color = MaterialTheme.colorScheme.onSecondary)
-            }
         }
     }
 }

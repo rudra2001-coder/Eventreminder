@@ -1,4 +1,4 @@
-package com.rudra.eventreminder.ui
+package com.rudra.eventreminder.ui.screens
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -26,7 +26,6 @@ import androidx.compose.material.icons.filled.Event
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Timeline
-import androidx.compose.material.ripple.rememberRipple
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.DropdownMenu
@@ -52,6 +51,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -80,7 +80,12 @@ fun DashboardScreen(
     backupViewModel: BackupViewModel,
     onEventClick: (Event) -> Unit,
     onAddEvent: () -> Unit,
-    onNavigateToTimeline: () -> Unit
+    onNavigateToTimeline: () -> Unit,
+    onNavigateToGiftReminder: (Int) -> Unit,
+    onNavigateToNotes: (Int) -> Unit,
+    onNavigateToHabits: () -> Unit,
+    onNavigateToMemoryBox: () -> Unit,
+    onNavigateToCalendar: () -> Unit
 ) {
     val events by viewModel.events.collectAsState(initial = emptyList())
     var searchQuery by remember { mutableStateOf("") }
@@ -97,8 +102,7 @@ fun DashboardScreen(
         SortOption.EVENT_TYPE -> filteredEvents.sortedBy { it.eventType }
     }
 
-    val upcomingEvents = sortedEvents
-    val todayEvents = upcomingEvents.filter {
+    val todayEvents = sortedEvents.filter {
         it.date == LocalDate.now()
     }
 
@@ -139,11 +143,21 @@ fun DashboardScreen(
                             contentDescription = "Timeline"
                         )
                     }
+                    IconButton(onClick = { onNavigateToCalendar() }) {
+                        Icon(
+                            imageVector = Icons.Default.CalendarToday,
+                            contentDescription = "Calendar"
+                        )
+                    }
                     MoreOptions(
                         themeViewModel = themeViewModel, 
                         backupViewModel = backupViewModel, 
                         events = events,
-                        onSortOptionSelected = { sortOption = it }
+                        onSortOptionSelected = { sortOption = it },
+                        onNavigateToGiftReminder = onNavigateToGiftReminder,
+                        onNavigateToNotes = onNavigateToNotes,
+                        onNavigateToHabits = onNavigateToHabits,
+                        onNavigateToMemoryBox = onNavigateToMemoryBox
                     )
                 }
             )
@@ -214,7 +228,7 @@ fun DashboardScreen(
                     .weight(1f)
                     .padding(horizontal = 16.dp)
             ) {
-                items(upcomingEvents) { event ->
+                items(sortedEvents) { event ->
                     EventCard(
                         event = event,
                         onEventClick = { onEventClick(event) },
@@ -223,7 +237,7 @@ fun DashboardScreen(
                 }
 
                 item {
-                    if (upcomingEvents.isEmpty()) {
+                    if (sortedEvents.isEmpty()) {
                         EmptyState()
                     }
                 }
@@ -266,7 +280,7 @@ fun EventStatsSection(todayEvents: Int, totalEvents: Int) {
 }
 
 @Composable
-fun StatItem(count: String, label: String, icon: androidx.compose.ui.graphics.vector.ImageVector, color: Color) {
+fun StatItem(count: String, label: String, icon: ImageVector, color: Color) {
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
         Box(
             modifier = Modifier
@@ -311,7 +325,7 @@ fun EventCard(event: Event, onEventClick: () -> Unit, isToday: Boolean) {
             .graphicsLayer { this.scaleX = scale; this.scaleY = scale }
             .clickable(
                 interactionSource = interactionSource,
-                indication = rememberRipple(),
+
                 onClick = onEventClick
             ),
         colors = CardDefaults.cardColors(
@@ -441,7 +455,11 @@ fun MoreOptions(
     themeViewModel: ThemeViewModel,
     backupViewModel: BackupViewModel,
     events: List<Event>,
-    onSortOptionSelected: (SortOption) -> Unit
+    onSortOptionSelected: (SortOption) -> Unit,
+    onNavigateToGiftReminder: (Int) -> Unit,
+    onNavigateToNotes: (Int) -> Unit,
+    onNavigateToHabits: () -> Unit,
+    onNavigateToMemoryBox: () -> Unit
 ) {
     var expanded by remember { mutableStateOf(false) }
 
@@ -453,7 +471,7 @@ fun MoreOptions(
             expanded = expanded,
             onDismissRequest = { expanded = false }
         ) {
-            Theme.values().forEach { theme ->
+            Theme.entries.forEach { theme ->
                 DropdownMenuItem(onClick = {
                     themeViewModel.setTheme(theme)
                     expanded = false
@@ -467,12 +485,28 @@ fun MoreOptions(
                 backupViewModel.importEvents()
                 expanded = false
             }, text = { Text(text = "Import") })
-            SortOption.values().forEach { sortOption ->
+            SortOption.entries.forEach { sortOption ->
                 DropdownMenuItem(onClick = {
                     onSortOptionSelected(sortOption)
                     expanded = false
                 }, text = { Text(text = "Sort by ${sortOption.name}") })
             }
+            DropdownMenuItem(onClick = {
+                onNavigateToGiftReminder(0) // TODO: Get the real event id
+                expanded = false
+            }, text = { Text(text = "Gifts") })
+            DropdownMenuItem(onClick = {
+                onNavigateToNotes(0) // TODO: Get the real event id
+                expanded = false
+            }, text = { Text(text = "Notes") })
+             DropdownMenuItem(onClick = {
+                onNavigateToHabits()
+                expanded = false
+            }, text = { Text(text = "Habits") })
+            DropdownMenuItem(onClick = {
+                onNavigateToMemoryBox()
+                expanded = false
+            }, text = { Text(text = "Memory Box") })
         }
     }
 }

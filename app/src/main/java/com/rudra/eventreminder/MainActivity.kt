@@ -10,7 +10,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import com.rudra.eventreminder.ui.AppNavigation
+import com.rudra.eventreminder.ui.AppNavHost
 import com.rudra.eventreminder.ui.theme.EventReminderTheme
 import com.rudra.eventreminder.util.createNotificationChannel
 import com.rudra.eventreminder.viewmodel.BackupViewModel
@@ -30,7 +30,7 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    AppNavigation(themeViewModel = themeViewModel, backupViewModel = backupViewModel)
+                    AppNavHost(themeViewModel = themeViewModel, backupViewModel = backupViewModel)
                 }
             }
         }

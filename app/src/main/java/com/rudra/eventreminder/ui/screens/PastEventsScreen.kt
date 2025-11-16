@@ -20,12 +20,17 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.rudra.eventreminder.data.Event
+import com.rudra.eventreminder.ui.composables.EventCountdownCard
 import com.rudra.eventreminder.util.DateUtils
 import com.rudra.eventreminder.viewmodel.EventViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun PastEventsScreen(viewModel: EventViewModel, onNavigateBack: () -> Unit) {
+fun PastEventsScreen(
+    viewModel: EventViewModel,
+    onNavigateBack: () -> Unit,
+    onEventClick: (Event) -> Unit
+) {
     val pastEvents by viewModel.events.collectAsState(initial = emptyList())
 
     Scaffold(
@@ -54,7 +59,8 @@ fun PastEventsScreen(viewModel: EventViewModel, onNavigateBack: () -> Unit) {
                 EventCountdownCard(
                     event = event,
                     daysLeft = DateUtils.daysLeft(event.date, event.isRecurring),
-                    onDelete = { viewModel.deleteEvent(event.id.toLong()) }
+                    onDelete = { viewModel.deleteEvent(event.id.toLong()) },
+                    onEventClick = onEventClick
                 )
             }
         }

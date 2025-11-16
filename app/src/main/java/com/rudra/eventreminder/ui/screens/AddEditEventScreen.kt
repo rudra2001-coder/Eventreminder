@@ -1,4 +1,4 @@
-package com.rudra.eventreminder.ui
+package com.rudra.eventreminder.ui.screens
 
 import android.app.DatePickerDialog
 import android.app.TimePickerDialog
@@ -43,6 +43,7 @@ fun AddEditEventScreen(viewModel: EventViewModel, onDone: () -> Unit, eventId: L
     val ctx = LocalContext.current
     var title by remember { mutableStateOf("") }
     var desc by remember { mutableStateOf("") }
+    var eventType by remember { mutableStateOf("") }
     var emoji by remember { mutableStateOf("") }
     var date by remember { mutableStateOf(LocalDate.now()) }
     var time by remember { mutableStateOf<LocalTime?>(LocalTime.of(9, 0)) }
@@ -51,11 +52,12 @@ fun AddEditEventScreen(viewModel: EventViewModel, onDone: () -> Unit, eventId: L
     LaunchedEffect(event) {
         event?.let {
             title = it.title
-            desc = it.description
+            desc = it.description ?: ""
             emoji = it.emoji
             date = it.date
-            time = it.reminderTime
+            time = it.reminderTimes.firstOrNull()
             recur = it.isRecurring
+            eventType = it.eventType
         }
     }
 
@@ -90,6 +92,8 @@ fun AddEditEventScreen(viewModel: EventViewModel, onDone: () -> Unit, eventId: L
         Spacer(Modifier.height(8.dp))
         OutlinedTextField(value = emoji, onValueChange = { emoji = it }, label = { Text("Emoji") }, modifier = Modifier.fillMaxWidth())
         Spacer(Modifier.height(8.dp))
+        OutlinedTextField(value = eventType, onValueChange = { eventType = it }, label = { Text("Event Type") }, modifier = Modifier.fillMaxWidth())
+        Spacer(Modifier.height(8.dp))
 
         Row {
             Button(onClick = { datePicker.show() }) { Text("Pick date: ${date.toString()}") }
@@ -113,8 +117,9 @@ fun AddEditEventScreen(viewModel: EventViewModel, onDone: () -> Unit, eventId: L
                     description = desc,
                     date = date,
                     emoji = emoji,
-                    reminderTime = time,
-                    isRecurring = recur
+                    reminderTimes = time?.let { listOf(it) } ?: emptyList(),
+                    isRecurring = recur,
+                    eventType = eventType
                 )
                 if (event == null) {
                     viewModel.addEvent(updatedEvent)

@@ -19,8 +19,8 @@ class BootReceiver : BroadcastReceiver() {
                     val dao = AppDatabase.getDatabase(context).eventDao()
                     val events = dao.getAllEvents().first()
                     events.forEach { event ->
-                        if (event.reminderTime != null) {
-                            ReminderScheduler.scheduleReminder(context, event)
+                        if (event.reminderTimes.isNotEmpty()) {
+                            ReminderScheduler.scheduleReminders(context, event)
                         }
                     }
                 } finally {

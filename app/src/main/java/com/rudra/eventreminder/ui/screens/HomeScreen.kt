@@ -1,5 +1,3 @@
-package com.rudra.eventreminder.ui.screens
-
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsPressedAsState
@@ -22,7 +20,6 @@ import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Face
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.MoreVert
-import androidx.compose.material.ripple.rememberRipple
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.DropdownMenu
@@ -187,7 +184,7 @@ fun EventCountdownCard(event: Event, daysLeft: Long, onDelete: () -> Unit) {
             .graphicsLayer { this.scaleX = scale; this.scaleY = scale }
             .clickable(
                 interactionSource = interactionSource,
-                indication = rememberRipple(),
+                indication = null,
                 onClick = { /* Handle card click if needed */ }
             ),
         elevation = CardDefaults.cardElevation(defaultElevation = elevation),
@@ -319,11 +316,11 @@ fun ThemeSelector(themeViewModel: ThemeViewModel) {
             expanded = expanded,
             onDismissRequest = { expanded = false }
         ) {
-            Theme.values().forEach { theme ->
+            Theme.entries.forEach { theme ->
                 DropdownMenuItem(onClick = {
                     themeViewModel.setTheme(theme)
                     expanded = false
-                }, text = { Text(text = theme.name) })
+                }, text = {Text(theme.name)})
             }
         }
     }
